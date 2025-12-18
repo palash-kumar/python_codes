@@ -1,0 +1,1 @@
+pip install selenium # Install Selenium for web automation
