@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <style>
+            .glass {
+                backdrop-filter: blur(12px);
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .neon {
+                text-shadow: 0 0 8px #00eaff, 0 0 16px #00eaff;
+            }
+            .btn-glow:hover {
+                box-shadow: 0 0 12px #00eaff;
+            }
+        </style>
+    </head>
+
+    <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black">
+    <div class="glass rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-700">
+        <div class="mb-4">
+            <input id="display" value="0" readonly class="glass neon text-cyan-300 rounded-xl px-4 py-4 w-full text-right text-3xl font-mono tracking-wide overflow-x-auto outline-none" />
+
+        </div>
+        <div class="grid grid-cols-5 gap-3 text-lg font-semibold">
+            <!-- Functions -->
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">sin</button>
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">log</button>
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">sqrt</button>
+            <button class="btn-op glass btn-glow py-2 rounded-lg text-yellow-300">^</button>
+            <button class="btn-clear glass btn-glow py-2 rounded-lg text-rose-400">AC</button>
+            
+
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">cos</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">7</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">8</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">9</button>
+            <button class="btn-op glass btn-glow py-3 rounded-lg text-yellow-300">/</button>
+
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">tan</button>  
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">4</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">5</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">6</button>
+            <button class="btn-op glass btn-glow py-3 rounded-lg text-yellow-300">*</button>
+
+            <button class="btn-fn glass btn-glow py-2 rounded-lg text-cyan-300">ln</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">1</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">2</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">3</button>
+            <button class="btn-op glass btn-glow py-3 rounded-lg text-yellow-300">-</button>
+            
+
+            
+            <button class="btn-pi glass btn-glow py-3 rounded-lg text-purple-300">π</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">0</button>
+            <button class="btn-num glass btn-glow py-3 rounded-lg text-white">.</button>
+            <button class="btn-eq glass btn-glow py-3 rounded-lg text-green-300">=</button>
+            <button class="btn-op glass btn-glow py-3 rounded-lg text-yellow-300">+</button>
+            
+            
+            
+            <!-- Numbers -->
+            
+            
+            
+            
+        </div>
+    </div>
+
+    </body>
+
+    
+    <script>
+        let display = $("#display");
+        let expression = "";
+        let insideFunction = false;
+        let funcStartIndex = -1;
+        let fontSize = 32;
+
+        function updateDisplay() {
+            if (insideFunction) {
+                $("#display").val(expression + ")");
+            } else {
+                $("#display").val(expression || "0");
+            }
+
+            adjustFontSize()
+        }
+
+        function adjustFontSize() {
+            const len = expression.length;
+            const displayEl = $("#display");
+            
+
+            if (len <= 17 ) {
+                displayEl.css("font-size", fontSize+"px"); // 32 - 2
+            }
+
+            if (len > 17 && len <= 20) {
+                displayEl.css("font-size", (fontSize - 4)+"px"); // 32 - 4
+            } else if (len > 20 && len <= 24) {
+                displayEl.css("font-size", (fontSize - 8)+"px"); // 32 - 2
+            } else if (len > 24 && len <= 30) {
+                displayEl.css("font-size", (fontSize - 12)+"px"); // 32 - 2
+            }else if (len > 30 && len <= 35) {
+                displayEl.css("font-size", (fontSize - 16)+"px"); // 32 - 2
+            } 
+        }
+
+        $(document).ready(function () {
+        
+            
+        
+            // Function buttons: sin, cos, tan, log, ln, sqrt
+            $(".btn-fn").on("click", function () {
+                let fn = $(this).text().trim();
+                expression += fn + "(";
+                insideFunction = true;
+                funcStartIndex = expression.length - 1;
+                updateDisplay();
+            });
+        
+            // Number buttons
+            $(".btn-num").on("click", function () {
+                let num = $(this).text().trim();
+
+                if (insideFunction) {
+                    // Append number normally inside the function
+                    expression += num;
+                } else {
+                    expression += num;
+                }
+
+                updateDisplay();
+            });
+
+        
+            // Operators
+            $(".btn-op").on("click", function () {
+                let op = $(this).text().trim();
+        
+                if (insideFunction) {
+                    expression += ")";
+                    insideFunction = false;
+                    funcStartIndex = -1;
+                }
+
+                expression += op;
+                updateDisplay();
+            });
+
+            // PI button
+            $(".btn-pi").on("click", function () {
+                if (insideFunction) {
+                    expression += "π";
+                } else {
+                    expression += "π";
+                }
+                updateDisplay();
+            });
+
+        
+            // Clear
+            $(".btn-clear").on("click", function () {
+                expression = "";
+                insideFunction = false;
+                display.val("0");
+            });
+        
+            
+
+            // Equals
+            $(".btn-eq").on("click", function () {
+                if (insideFunction) {
+                    expression += ")";
+                    insideFunction = false;
+                }
+        
+                calculate();
+            });
+        
+        });
+
+        // ---------------------------
+// KEYBOARD INPUT HANDLER
+// ---------------------------
+$(document).on("keydown", function (e) {
+    let key = e.key;
+
+    // Preventing default browser actions for calculator keys
+    if (["Enter", "Backspace", "Escape"].includes(key) || /^[0-9+\-*/.^]$/.test(key)) {
+        e.preventDefault();
+    }
+
+    // Numbers 0–9
+    if (/^[0-9]$/.test(key)) {
+        if (insideFunction) {
+            expression += key;   
+        } else {
+            expression += key;
+        }
+        updateDisplay();
+        return;
+    }
+
+
+    // Decimal point
+    if (key === ".") {
+        if (insideFunction) {
+            expression =
+                expression.slice(0, funcStartIndex + 1) +
+                "." +
+                expression.slice(funcStartIndex + 1);
+        } else {
+            expression += ".";
+        }
+        updateDisplay();
+        return;
+    }
+
+    // Operators
+    if (["+", "-", "*", "/", "^"].includes(key)) {
+        if (insideFunction) {
+            expression += ")";
+            insideFunction = false;
+            funcStartIndex = -1;
+        }
+        expression += key;
+        updateDisplay();
+        return;
+    }
+
+    // Enter = Equals
+    if (key === "Enter") {
+        if (insideFunction) {
+            expression += ")";
+            insideFunction = false;
+            funcStartIndex = -1;
+        }
+        calculate();
+        
+        return;
+    }
+
+    // Backspace
+    if (key === "Backspace") {
+        expression = expression.slice(0, -1);
+        updateDisplay();
+        return;
+    }
+
+    // Clear Display
+    if (key === "Escape") {
+        expression = "";
+        insideFunction = false;
+        funcStartIndex = -1;
+        updateDisplay();
+        return;
+    }
+
+    // Function shortcuts
+    if (key === "s") { expression += "sin("; insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "c") { expression += "cos("; insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "t") { expression += "tan("; insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "l") { expression += "log("; insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "n") { expression += "ln(";  insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "q") { expression += "sqrt("; insideFunction = true; funcStartIndex = expression.length - 1; updateDisplay(); return; }
+    if (key === "p") { expression += "π"; updateDisplay(); return; }
+});
+
+const calculate = () => {
+    $.ajax({
+            url: "/api/calc",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ expr: expression }),
+            success: function (res) {
+                $("#display").val(res.result);
+                expression = res.result.toString();
+            },
+            error: function () {
+                $("#display").val("ERR");
+            }
+        });
+}
+    </script>
+
+</html>
